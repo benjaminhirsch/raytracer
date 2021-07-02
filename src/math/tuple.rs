@@ -1,3 +1,6 @@
+use std::ops;
+
+#[derive(Copy, Clone)]
 pub struct Tuple {
     x: f64,
     y: f64,
@@ -6,6 +9,10 @@ pub struct Tuple {
 }
 
 impl Tuple {
+    pub fn create(x: f64, y: f64, z: f64, w: f64) -> Tuple {
+        Tuple { x, y, z, w }
+    }
+
     pub fn vector(x: f64, y: f64, z: f64) -> Tuple {
         Tuple { x, y, z, w: 0.0 }
     }
@@ -36,6 +43,67 @@ impl Tuple {
         }
 
         return true;
+    }
+
+    pub fn multiply_by(&self, factor: f64) -> Tuple {
+        Tuple {
+            x: self.x * factor,
+            y: self.y * factor,
+            z: self.z * factor,
+            w: self.w * factor,
+        }
+    }
+
+    pub fn divide_by(&self, factor: f64) -> Tuple {
+        Tuple {
+            x: self.x / factor,
+            y: self.y / factor,
+            z: self.z / factor,
+            w: self.w / factor,
+        }
+    }
+
+    pub fn magnitude(&self) -> f64 {
+        f64::sqrt(self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w)
+    }
+}
+
+impl ops::Sub<Tuple> for Tuple {
+    type Output = Tuple;
+
+    fn sub(self, rhs: Tuple) -> Self::Output {
+        Tuple {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+            w: self.w - rhs.w,
+        }
+    }
+}
+
+impl ops::Add<Tuple> for Tuple {
+    type Output = Tuple;
+
+    fn add(self, rhs: Tuple) -> Self::Output {
+        Tuple {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+            w: self.w + rhs.w,
+        }
+    }
+}
+
+impl ops::Neg for Tuple {
+    type Output = Tuple;
+
+    fn neg(self) -> Self::Output {
+        Tuple {
+            x: -1.0 * self.x,
+            y: -1.0 * self.y,
+            z: -1.0 * self.z,
+            w: -1.0 * self.w,
+        }
     }
 }
 
@@ -84,4 +152,111 @@ fn tuple_comparison() {
     let vec2 = Tuple::vector(4.0, -4.0, 2.0);
 
     assert_eq!(false, vec1.equal_to(vec2));
+}
+
+#[test]
+fn tuple_addition() {
+    let tuple_1 = Tuple::point(3.0, -2.0, 5.0);
+    let tuple_2 = Tuple::vector(-2.0, 3.0, 1.0);
+    let new_tuple = tuple_1 + tuple_2;
+
+    assert_eq!(1.0, new_tuple.x);
+    assert_eq!(1.0, new_tuple.y);
+    assert_eq!(6.0, new_tuple.z);
+    assert_eq!(true, new_tuple.is_point());
+    assert_eq!(false, new_tuple.is_vector());
+}
+
+#[test]
+fn tuple_subtraction() {
+    let tuple_1 = Tuple::point(3.0, 2.0, 1.0);
+    let tuple_2 = Tuple::point(5.0, 6.0, 7.0);
+    let new_tuple = tuple_1 - tuple_2;
+
+    assert_eq!(-2.0, new_tuple.x);
+    assert_eq!(-4.0, new_tuple.y);
+    assert_eq!(-6.0, new_tuple.z);
+    assert_eq!(false, new_tuple.is_point());
+    assert_eq!(true, new_tuple.is_vector());
+
+    let tuple_1 = Tuple::point(3.0, 2.0, 1.0);
+    let tuple_2 = Tuple::vector(5.0, 6.0, 7.0);
+    let new_tuple = tuple_1 - tuple_2;
+
+    assert_eq!(-2.0, new_tuple.x);
+    assert_eq!(-4.0, new_tuple.y);
+    assert_eq!(-6.0, new_tuple.z);
+    assert_eq!(true, new_tuple.is_point());
+    assert_eq!(false, new_tuple.is_vector());
+
+    let tuple_1 = Tuple::vector(3.0, 2.0, 1.0);
+    let tuple_2 = Tuple::vector(5.0, 6.0, 7.0);
+    let new_tuple = tuple_1 - tuple_2;
+
+    assert_eq!(-2.0, new_tuple.x);
+    assert_eq!(-4.0, new_tuple.y);
+    assert_eq!(-6.0, new_tuple.z);
+    assert_eq!(false, new_tuple.is_point());
+    assert_eq!(true, new_tuple.is_vector());
+}
+
+#[test]
+fn tuple_overloading() {
+    let tup = Tuple::create(1.0, -2.0, 3.0, -4.0);
+    let negated_tuple = -tup;
+    assert_eq!(-1.0, negated_tuple.x);
+    assert_eq!(2.0, negated_tuple.y);
+    assert_eq!(-3.0, negated_tuple.z);
+    assert_eq!(4.0, negated_tuple.w);
+}
+
+#[test]
+fn tuple_multiplying_by_scalar() {
+    let my_tuple = Tuple::create(1.0, -2.0, 3.0, -4.0);
+    let multiplied_tuple = my_tuple.multiply_by(3.5);
+
+    assert_eq!(3.5, multiplied_tuple.x);
+    assert_eq!(-7.0, multiplied_tuple.y);
+    assert_eq!(10.5, multiplied_tuple.z);
+    assert_eq!(-14.0, multiplied_tuple.w);
+}
+
+#[test]
+fn tuple_multiplying_by_fraction() {
+    let my_tuple = Tuple::create(1.0, -2.0, 3.0, -4.0);
+    let multiplied_tuple = my_tuple.multiply_by(0.5);
+
+    assert_eq!(0.5, multiplied_tuple.x);
+    assert_eq!(-1.0, multiplied_tuple.y);
+    assert_eq!(1.5, multiplied_tuple.z);
+    assert_eq!(-2.0, multiplied_tuple.w);
+}
+
+#[test]
+fn tuple_divide_by_scalar() {
+    let my_tuple = Tuple::create(1.0, -2.0, 3.0, -4.0);
+    let multiplied_tuple = my_tuple.divide_by(2.0);
+
+    assert_eq!(0.5, multiplied_tuple.x);
+    assert_eq!(-1.0, multiplied_tuple.y);
+    assert_eq!(1.5, multiplied_tuple.z);
+    assert_eq!(-2.0, multiplied_tuple.w);
+}
+
+#[test]
+fn vector_magnitude() {
+    let my_vector = Tuple::vector(1.0, 0.0, 0.0);
+    assert_eq!(1.0, my_vector.magnitude());
+
+    let my_vector = Tuple::vector(0.0, 1.0, 0.0);
+    assert_eq!(1.0, my_vector.magnitude());
+
+    let my_vector = Tuple::vector(0.0, 0.0, 1.0);
+    assert_eq!(1.0, my_vector.magnitude());
+
+    let my_vector = Tuple::vector(1.0, 2.0, 3.0);
+    assert_eq!(f64::sqrt(14.0), my_vector.magnitude());
+
+    let my_vector = Tuple::vector(-1.0, -2.0, -3.0);
+    assert_eq!(f64::sqrt(14.0), my_vector.magnitude());
 }
