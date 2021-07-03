@@ -66,6 +66,27 @@ impl Tuple {
     pub fn magnitude(&self) -> f64 {
         f64::sqrt(self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w)
     }
+
+    pub fn normalize(&self) -> Tuple {
+        Tuple {
+            x: self.x / self.magnitude(),
+            y: self.y / self.magnitude(),
+            z: self.z / self.magnitude(),
+            w: self.w / self.magnitude(),
+        }
+    }
+
+    pub fn dot(&self, that: Tuple) -> f64 {
+        self.x * that.x + self.y * that.y + self.z * that.z + self.w * that.w
+    }
+
+    pub fn cross(&self, that: Tuple) -> Tuple {
+        Tuple::vector(
+            self.y * that.z - self.z * that.y,
+            self.z * that.x - self.x * that.z,
+            self.x * that.y - self.y * that.x,
+        )
+    }
 }
 
 impl ops::Sub<Tuple> for Tuple {
@@ -259,4 +280,43 @@ fn vector_magnitude() {
 
     let my_vector = Tuple::vector(-1.0, -2.0, -3.0);
     assert_eq!(f64::sqrt(14.0), my_vector.magnitude());
+}
+
+#[test]
+#[allow(unused_must_use)]
+fn vector_normalize() {
+    let my_vector = Tuple::vector(4.0, 0.0, 0.0).normalize();
+    assert_eq!(1.0, my_vector.x);
+    assert_eq!(0.0, my_vector.y);
+    assert_eq!(0.0, my_vector.z);
+
+    let my_vector = Tuple::vector(1.0, 2.0, 3.0).normalize();
+    abs_diff_eq!(0.26726, my_vector.x);
+    abs_diff_eq!(0.53452, my_vector.y);
+    abs_diff_eq!(0.80178, my_vector.z);
+    assert_eq!(1.0, my_vector.magnitude());
+}
+
+#[test]
+fn vector_to_dot() {
+    let vec1 = Tuple::vector(1.0, 2.0, 3.0);
+    let vec2 = Tuple::vector(2.0, 3.0, 4.0);
+
+    assert_eq!(20.0, vec1.dot(vec2));
+}
+
+#[test]
+fn vector_cross() {
+    let vec1 = Tuple::vector(1.0, 2.0, 3.0);
+    let vec2 = Tuple::vector(2.0, 3.0, 4.0);
+
+    let cross = vec1.cross(vec2);
+    assert_eq!(-1.0, cross.x);
+    assert_eq!(2.0, cross.y);
+    assert_eq!(-1.0, cross.z);
+
+    let cross = vec2.cross(vec1);
+    assert_eq!(1.0, cross.x);
+    assert_eq!(-2.0, cross.y);
+    assert_eq!(1.0, cross.z);
 }

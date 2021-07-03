@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate approx;
+
 use math::tuple::Tuple;
 
 mod math;
