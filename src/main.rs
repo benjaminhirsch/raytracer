@@ -1,10 +1,8 @@
 #[macro_use]
 extern crate approx;
 
-use math::tuple::Tuple;
-
+mod canvas;
+mod color;
 mod math;
 
-fn main() {
-    let _foo = Tuple::vector(1.2, 2.0, 3.0);
-}
+fn main() {}
