@@ -19,6 +19,31 @@ impl Color {
             blue: self.blue * factor,
         }
     }
+
+    pub fn as_string(&self) -> String {
+        let mut color_as_string = String::new();
+        color_as_string.push_str(&*String::from(float_to_int(self.red).to_string()));
+        color_as_string.push_str(" ");
+        color_as_string.push_str(&*String::from(float_to_int(self.green).to_string()));
+        color_as_string.push_str(" ");
+        color_as_string.push_str(&*String::from(float_to_int(self.blue).to_string()));
+
+        color_as_string
+    }
+}
+
+pub fn float_to_int(color: f64) -> u32 {
+    let color_as_int = f64::round(color * 255.) as i32;
+
+    if color_as_int < 0 {
+        return 0;
+    }
+
+    if color_as_int > 255 {
+        return 255;
+    }
+
+    return color_as_int as u32;
 }
 
 impl ops::Sub<Color> for Color {
