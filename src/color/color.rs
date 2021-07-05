@@ -19,8 +19,10 @@ impl Color {
             blue: self.blue * factor,
         }
     }
+}
 
-    pub fn as_string(&self) -> String {
+impl ToString for Color {
+    fn to_string(&self) -> String {
         let mut color_as_string = String::new();
         color_as_string.push_str(&*String::from(float_to_int(self.red).to_string()));
         color_as_string.push_str(" ");
