@@ -4,7 +4,7 @@ use std::iter::FromIterator;
 use crate::color::color::Color;
 
 #[derive(Debug)]
-struct Canvas {
+pub struct Canvas {
     width: i64,
     height: i64,
     pixels: BTreeMap<String, Color>,
