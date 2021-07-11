@@ -1,37 +1,29 @@
-use std::collections::BTreeMap;
 use std::iter::FromIterator;
 
 use crate::color::color::Color;
 
 #[derive(Debug)]
 pub struct Canvas {
-    width: i64,
-    height: i64,
-    pixels: BTreeMap<String, Color>,
+    pub width: usize,
+    pub height: usize,
+    pixels: Vec<Vec<Color>>,
 }
 
 impl Canvas {
-    pub fn create(width: i64, height: i64) -> Self {
-        let mut pixels = BTreeMap::new();
-        for x in 0..width {
-            for y in 0..height {
-                pixels.insert(key_from_coordinates(x, y), Color::create(0.0, 0.0, 0.0));
-            }
-        }
-
+    pub fn create(width: usize, height: usize) -> Canvas {
         Canvas {
             width,
             height,
-            pixels,
+            pixels: vec![vec![Color::create(0.0, 0.0, 0.0); width]; height],
         }
     }
 
-    pub fn write(&mut self, x: i64, y: i64, color: Color) {
-        self.pixels.insert(key_from_coordinates(x, y), color);
+    pub fn write(&mut self, x: usize, y: usize, color: Color) {
+        self.pixels[y][x] = color
     }
 
-    pub fn pixel_at(&self, x: i64, y: i64) -> Option<&Color> {
-        self.pixels.get(key_from_coordinates(x, y).as_str())
+    pub fn pixel_at(&self, x: usize, y: usize) -> Color {
+        self.pixels[y][x]
     }
 }
 
@@ -51,24 +43,22 @@ impl ToString for Canvas {
         ]));
 
         let mut pixels = 0;
-        for color in &self.pixels {
-            header.push_str(&*color.1.to_string());
-            pixels += 1;
+        for x in &self.pixels {
+            for y in x {
+                header.push_str(&*y.to_string());
+                pixels += 1;
 
-            if pixels == 5 {
-                header.push_str("\n");
-                pixels = 0;
-            } else {
-                header.push_str(" ");
+                if pixels == 5 {
+                    header.push_str("\n");
+                    pixels = 0;
+                } else {
+                    header.push_str(" ");
+                }
             }
         }
 
         header
     }
-}
-
-fn key_from_coordinates(x: i64, y: i64) -> String {
-    format!("{}_{}", x, y)
 }
 
 #[test]
@@ -79,9 +69,9 @@ fn canvas() {
 
     canvas.write(2, 3, Color::create(1.0, 0.0, 0.0));
 
-    assert_eq!(1.0, canvas.pixel_at(2, 3).unwrap().red);
-    assert_eq!(0.0, canvas.pixel_at(2, 3).unwrap().green);
-    assert_eq!(0.0, canvas.pixel_at(2, 3).unwrap().blue);
+    assert_eq!(1.0, canvas.pixel_at(2, 3).red);
+    assert_eq!(0.0, canvas.pixel_at(2, 3).green);
+    assert_eq!(0.0, canvas.pixel_at(2, 3).blue);
 }
 
 #[test]

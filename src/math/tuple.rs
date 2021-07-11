@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Tuple {
     x: f64,
     y: f64,
@@ -29,40 +29,6 @@ impl Tuple {
         self.w > 0.0
     }
 
-    pub fn equal_to(&self, that: Tuple) -> bool {
-        if f64::abs(self.x - that.x) > f64::EPSILON {
-            return false;
-        }
-
-        if f64::abs(self.y - that.y) > f64::EPSILON {
-            return false;
-        }
-
-        if f64::abs(self.z - that.z) > f64::EPSILON {
-            return false;
-        }
-
-        return true;
-    }
-
-    pub fn multiply_by(&self, factor: f64) -> Tuple {
-        Tuple {
-            x: self.x * factor,
-            y: self.y * factor,
-            z: self.z * factor,
-            w: self.w * factor,
-        }
-    }
-
-    pub fn divide_by(&self, factor: f64) -> Tuple {
-        Tuple {
-            x: self.x / factor,
-            y: self.y / factor,
-            z: self.z / factor,
-            w: self.w / factor,
-        }
-    }
-
     pub fn magnitude(&self) -> f64 {
         f64::sqrt(self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w)
     }
@@ -86,6 +52,37 @@ impl Tuple {
             self.z * that.x - self.x * that.z,
             self.x * that.y - self.y * that.x,
         )
+    }
+}
+
+impl PartialEq for Tuple {
+    fn eq(&self, that: &Self) -> bool {
+        if f64::abs(self.x - that.x) > f64::EPSILON {
+            return false;
+        }
+
+        if f64::abs(self.y - that.y) > f64::EPSILON {
+            return false;
+        }
+
+        if f64::abs(self.z - that.z) > f64::EPSILON {
+            return false;
+        }
+
+        return true;
+    }
+}
+
+impl ops::Div<f64> for Tuple {
+    type Output = Tuple;
+
+    fn div(self, factor: f64) -> Self::Output {
+        Tuple {
+            x: self.x / factor,
+            y: self.y / factor,
+            z: self.z / factor,
+            w: self.w / factor,
+        }
     }
 }
 
@@ -128,6 +125,19 @@ impl ops::Neg for Tuple {
     }
 }
 
+impl ops::Mul<f64> for Tuple {
+    type Output = Tuple;
+
+    fn mul(self, factor: f64) -> Self::Output {
+        Tuple {
+            x: self.x * factor,
+            y: self.y * factor,
+            z: self.z * factor,
+            w: self.w * factor,
+        }
+    }
+}
+
 #[test]
 fn point_creation() {
     let my_point = Tuple::point(4.0, -4.0, 3.0);
@@ -157,22 +167,22 @@ fn tuple_comparison() {
     let vec1 = Tuple::vector(4.0, -4.0, 3.0);
     let vec2 = Tuple::vector(4.0, -4.0, 3.0);
 
-    assert_eq!(true, vec1.equal_to(vec2));
+    assert_eq!(vec1, vec2);
 
     let vec1 = Tuple::vector(4.0, -4.0, 3.0);
     let vec2 = Tuple::vector(2.0, -4.0, 3.0);
 
-    assert_eq!(false, vec1.equal_to(vec2));
+    assert_ne!(vec1, vec2);
 
     let vec1 = Tuple::vector(4.0, -4.0, 3.0);
     let vec2 = Tuple::vector(4.0, -3.0, 3.0);
 
-    assert_eq!(false, vec1.equal_to(vec2));
+    assert_ne!(vec1, vec2);
 
     let vec1 = Tuple::vector(4.0, -4.0, 3.0);
     let vec2 = Tuple::vector(4.0, -4.0, 2.0);
 
-    assert_eq!(false, vec1.equal_to(vec2));
+    assert_ne!(vec1, vec2);
 }
 
 #[test]
@@ -234,7 +244,7 @@ fn tuple_overloading() {
 #[test]
 fn tuple_multiplying_by_scalar() {
     let my_tuple = Tuple::create(1.0, -2.0, 3.0, -4.0);
-    let multiplied_tuple = my_tuple.multiply_by(3.5);
+    let multiplied_tuple = my_tuple * 3.5;
 
     assert_eq!(3.5, multiplied_tuple.x);
     assert_eq!(-7.0, multiplied_tuple.y);
@@ -245,7 +255,7 @@ fn tuple_multiplying_by_scalar() {
 #[test]
 fn tuple_multiplying_by_fraction() {
     let my_tuple = Tuple::create(1.0, -2.0, 3.0, -4.0);
-    let multiplied_tuple = my_tuple.multiply_by(0.5);
+    let multiplied_tuple = my_tuple * 0.5;
 
     assert_eq!(0.5, multiplied_tuple.x);
     assert_eq!(-1.0, multiplied_tuple.y);
@@ -256,7 +266,7 @@ fn tuple_multiplying_by_fraction() {
 #[test]
 fn tuple_divide_by_scalar() {
     let my_tuple = Tuple::create(1.0, -2.0, 3.0, -4.0);
-    let multiplied_tuple = my_tuple.divide_by(2.0);
+    let multiplied_tuple = my_tuple / 2.0;
 
     assert_eq!(0.5, multiplied_tuple.x);
     assert_eq!(-1.0, multiplied_tuple.y);
