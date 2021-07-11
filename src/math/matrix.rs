@@ -31,6 +31,28 @@ pub struct Matrix {
     size: usize,
 }
 
+pub const IDENTITY_MATRIX: Matrix = Matrix {
+    inner: [
+        Row {
+            inner: [1., 0., 0., 0.],
+            size: 4,
+        },
+        Row {
+            inner: [0., 1., 0., 0.],
+            size: 4,
+        },
+        Row {
+            inner: [0., 0., 1., 0.],
+            size: 4,
+        },
+        Row {
+            inner: [0., 0., 0., 1.],
+            size: 4,
+        },
+    ],
+    size: 4,
+};
+
 impl Matrix {
     pub fn create(row0: [f64; 4], row1: [f64; 4], row2: [f64; 4], row3: [f64; 4]) -> Self {
         Self {
@@ -118,6 +140,17 @@ impl Matrix {
     pub fn set(&mut self, row: usize, col: usize, value: f64) {
         self.inner[row].inner[col] = value;
     }
+
+    pub fn transpose(&self) -> Self {
+        let mut matrix = self.empty();
+        let size = self.size;
+        for row in 0..size {
+            for col in 0..size {
+                matrix.set(col, row, self[row][col]);
+            }
+        }
+        matrix
+    }
 }
 
 impl ops::Index<usize> for Matrix {
@@ -133,15 +166,15 @@ impl ops::Index<usize> for Matrix {
 impl ops::Mul<Matrix> for Matrix {
     type Output = Matrix;
     fn mul(self, rhs: Matrix) -> Self::Output {
-        let mut m = self.empty();
+        let mut matrix = self.empty();
         let size = self.size;
         for row in 0..size {
             for col in 0..size {
                 let a = (0..size).map(|i| self[row][i] * rhs[i][col]).sum();
-                m.set(row, col, a);
+                matrix.set(row, col, a);
             }
         }
-        m
+        matrix
     }
 }
 
@@ -286,4 +319,46 @@ fn multiply_matrix_by_tuple() {
     let expected = Tuple::create(18., 24., 33., 1.);
 
     assert_eq!(expected, a * b);
+}
+
+#[test]
+fn multiply_matrix_with_identity_matrix() {
+    let m = Matrix::create(
+        [0., 1., 2., 4.],
+        [1., 2., 4., 8.],
+        [2., 4., 8., 16.],
+        [4., 8., 16., 32.],
+    );
+
+    assert_eq!(m, m * IDENTITY_MATRIX);
+}
+
+#[test]
+fn multiply_identity_matrix_by_a_tuple() {
+    let a = Tuple::create(1., 2., 3., 4.);
+    assert_eq!(IDENTITY_MATRIX * a, a);
+}
+
+#[test]
+fn transpose_a_matrix() {
+    let m = Matrix::create(
+        [0., 9., 3., 0.],
+        [9., 8., 0., 8.],
+        [1., 8., 5., 3.],
+        [0., 0., 5., 8.],
+    );
+
+    let expect = Matrix::create(
+        [0., 9., 1., 0.],
+        [9., 8., 8., 0.],
+        [3., 0., 5., 5.],
+        [0., 8., 3., 8.],
+    );
+
+    assert_eq!(expect, m.transpose());
+}
+
+#[test]
+fn transpose_identity_matrix() {
+    assert_eq!(IDENTITY_MATRIX, IDENTITY_MATRIX.transpose());
 }
